@@ -4,6 +4,7 @@ mode: primary
 permission:
   edit: deny
   task: deny
+  skill: deny
   webfetch: deny
   websearch: deny
   bash:

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "policy": {
+    "externalInstallation": "explicit",
+    "scope": "project",
+    "agent": "opencode",
+    "copy": true,
+    "telemetryOptOutByDefault": true,
+    "reviewBeforeInstall": true
+  },
+  "profiles": {
+    "web": [
+      "frontend-design",
+      "vercel-react-best-practices",
+      "webapp-testing"
+    ],
+    "design-heavy": [
+      "frontend-design",
+      "ui-ux-pro-max"
+    ],
+    "backend": [
+      "backend-development"
+    ],
+    "postgres": [
+      "supabase-postgres-best-practices"
+    ],
+    "testing": [
+      "webapp-testing",
+      "playwright-best-practices"
+    ],
+    "react-native": [
+      "vercel-react-native-skills"
+    ],
+    "expo": [
+      "vercel-react-native-skills",
+      "building-native-ui",
+      "native-data-fetching"
+    ]
+  },
+  "skills": [
+    {
+      "name": "frontend-design",
+      "source": "https://github.com/anthropics/skills",
+      "status": "recommended",
+      "profiles": ["web", "design-heavy"],
+      "why": "Dirección visual intencional, tipografía, composición y rechazo de interfaces genéricas.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "ui-ux-pro-max",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "status": "review-required",
+      "profiles": ["design-heavy"],
+      "why": "Base extensa y consultable para UI/UX, accesibilidad, stacks y sistemas de diseño.",
+      "audits": {"Gen Agent Trust Hub": "fail", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "No se instala por defecto hasta revisar el fallo de confianza y sus scripts locales."
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "status": "recommended",
+      "profiles": ["web"],
+      "why": "Reglas priorizadas de rendimiento para React y Next.js.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "webapp-testing",
+      "source": "https://github.com/anthropics/skills",
+      "status": "recommended",
+      "profiles": ["web", "testing"],
+      "why": "Pruebas de aplicaciones web con Playwright y gestión del ciclo de vida del servidor.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "playwright-best-practices",
+      "source": "https://github.com/currents-dev/playwright-best-practices-skill",
+      "status": "optional",
+      "profiles": ["testing"],
+      "why": "Patrones profundos para fixtures, selectores, aislamiento, CI y tests Playwright.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "backend-development",
+      "source": "https://github.com/skillcreatorai/ai-agent-skills",
+      "status": "optional",
+      "profiles": ["backend"],
+      "why": "Guía general de diseño de APIs y prácticas backend cuando no existe una skill oficial del stack.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Skill comunitaria y genérica; las reglas del proyecto y las skills del proveedor tienen precedencia."
+    },
+    {
+      "name": "supabase-postgres-best-practices",
+      "source": "https://github.com/supabase/agent-skills",
+      "status": "recommended",
+      "profiles": ["postgres"],
+      "why": "SQL, índices, pooling, RLS, concurrencia y rendimiento de PostgreSQL; también sirve para Postgres sin Supabase.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "vercel-react-native-skills",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "status": "recommended",
+      "profiles": ["react-native", "expo"],
+      "why": "Rendimiento, navegación, animaciones, módulos nativos y patrones React Native/Expo.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "building-native-ui",
+      "source": "https://github.com/expo/skills",
+      "status": "optional",
+      "profiles": ["expo"],
+      "why": "UI nativa Expo, routing, safe areas, componentes y convenciones de plataforma.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "native-data-fetching",
+      "source": "https://github.com/expo/skills",
+      "status": "optional",
+      "profiles": ["expo"],
+      "why": "Networking móvil, cache, reintentos, tokens y soporte offline en Expo.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    }
+  ]
+}

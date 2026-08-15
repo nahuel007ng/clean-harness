@@ -6,6 +6,7 @@
 - Decide si la tarea es directa, planificada o crítica.
 - Usa `/pre-plan` solo si el alcance, el riesgo o la incertidumbre lo justifican.
 - Carga una skill de dominio solo cuando la tarea corresponda a ella.
+- Las skills externas se instalan desde el registro del harness, a nivel de proyecto y con revisión explícita.
 
 ## Durante el cambio
 

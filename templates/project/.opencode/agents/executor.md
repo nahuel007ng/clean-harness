@@ -4,6 +4,13 @@ mode: primary
 permission:
   edit: allow
   task: deny
+  skill:
+    "*": ask
+    "minimal-change": allow
+    "git-commit": allow
+    "frontend": allow
+    "backend": allow
+    "mobile": allow
   webfetch: ask
   websearch: ask
   external_directory: deny

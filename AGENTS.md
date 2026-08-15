@@ -16,3 +16,4 @@ Este repositorio contiene el harness portable, no el harness de un proyecto conc
 - No leer ni modificar el vault de Babel Tower desde este repositorio.
 - No añadir compatibilidad con versiones antiguas sin un caso de uso verificable.
 - No convertir una skill opcional en una regla global.
+- No instalar skills externas durante el desarrollo sin registrar fuente, perfil y revisión.

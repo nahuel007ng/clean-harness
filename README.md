@@ -38,6 +38,10 @@ El instalador no sobrescribe archivos existentes. La migración tampoco mueve na
 - `/verify`: ejecuta o propone verificaciones sin editar.
 - `/review`: revisión independiente del diff actual.
 
+## Skills externas
+
+Las skills externas no se instalan automáticamente. Consulta [docs/skills.md](docs/skills.md) y usa `node scripts/skills.mjs` para revisar e instalar un perfil según el stack del proyecto.
+
 ## Fuentes de diseño
 
 - [OpenCode agents](https://opencode.ai/docs/agents/)

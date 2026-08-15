@@ -27,3 +27,7 @@ El Executor puede crear un commit local por unidad funcional cuando el árbol es
 ## 7. La migración requiere intención explícita
 
 El migrador opera sobre un manifiesto de rutas. No deduce que una carpeta de documentación, wiki o vault sea harness y no sobrescribe destinos existentes.
+
+## 8. Las skills externas se gestionan por perfil
+
+Las skills de skills.sh son dependencias operativas externas, no parte automática del núcleo. Se registran con fuente, perfil, estado de auditoría y fecha de revisión. Se instalan por proyecto, con copia local y solo mediante una acción explícita.

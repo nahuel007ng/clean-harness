@@ -7,6 +7,7 @@
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
     "install:harness": "node scripts/install.mjs",
-    "migrate:harness": "node scripts/migrate.mjs"
+    "migrate:harness": "node scripts/migrate.mjs",
+    "skills": "node scripts/skills.mjs"
   }
 }

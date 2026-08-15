@@ -4,6 +4,7 @@ mode: subagent
 permission:
   edit: deny
   task: deny
+  skill: ask
   webfetch: deny
   websearch: deny
   bash:
