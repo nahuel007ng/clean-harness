@@ -1,0 +1,22 @@
+{
+  "archiveDir": ".harness-archive",
+  "protectedSegments": [
+    "docs",
+    "wiki",
+    "vault",
+    "knowledge",
+    ".kb"
+  ],
+  "paths": [
+    {
+      "path": ".opencode",
+      "kind": "harness",
+      "reason": "Configuración y agentes del harness anterior"
+    },
+    {
+      "path": ".agents",
+      "kind": "harness",
+      "reason": "Skills y soporte del harness anterior"
+    }
+  ]
+}
