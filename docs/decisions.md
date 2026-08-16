@@ -31,3 +31,9 @@ El migrador opera sobre un manifiesto de rutas. No deduce que una carpeta de doc
 ## 8. Las skills externas se gestionan por perfil
 
 Las skills de skills.sh son dependencias operativas externas, no parte automática del núcleo. Se registran con fuente, perfil, estado de auditoría y fecha de revisión. Se instalan por proyecto, con copia local y solo mediante una acción explícita.
+
+## 9. La inicialización sugiere skills según el repositorio
+
+El inicializador inspecciona nombres y contenido de archivos para detectar señales de stack. Muestra perfiles sugeridos, pero no ejecuta herramientas del proyecto ni descarga dependencias automáticamente. La instalación requiere `--apply` y deja un `.harness/skills-lock.json`, de forma que cambiar de modelo no cambie silenciosamente las instrucciones operativas.
+
+Los perfiles Android se separan por necesidad: base Kotlin/Android, Compose y diseño, QA con dispositivo, automatización avanzada y CameraX. La detección no instala todo el pack Android ni confunde una skill con permisos de ADB: el acceso real sigue dependiendo de SDK, emulador, dispositivo y permisos del entorno.

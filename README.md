@@ -25,6 +25,8 @@ node scripts/doctor.mjs
 node scripts/install.mjs --target C:\ruta\al\proyecto
 node scripts/install.mjs --target C:\ruta\al\proyecto --apply
 node scripts/doctor.mjs --project C:\ruta\al\proyecto
+node scripts/skills.mjs suggest --target C:\ruta\al\proyecto
+node scripts/skills.mjs install --profile android --profile android-compose --target C:\ruta\al\proyecto --apply
 node scripts/migrate.mjs --target C:\ruta\al\proyecto --manifest C:\ruta\manifest.json
 node scripts/migrate.mjs --target C:\ruta\al\proyecto --manifest C:\ruta\manifest.json --apply
 ```
@@ -40,7 +42,7 @@ El instalador no sobrescribe archivos existentes. La migración tampoco mueve na
 
 ## Skills externas
 
-Las skills externas no se instalan automáticamente. Consulta [docs/skills.md](docs/skills.md) y usa `node scripts/skills.mjs` para revisar e instalar un perfil según el stack del proyecto.
+Las skills externas no se instalan automáticamente. Al inicializar el harness se inspeccionan los archivos del proyecto y se muestran perfiles sugeridos. Consulta [docs/skills.md](docs/skills.md), revisa la propuesta y usa `node scripts/skills.mjs install` con `--apply` para instalarla. Las instalaciones exitosas quedan registradas en `.harness/skills-lock.json`.
 
 ## Fuentes de diseño
 

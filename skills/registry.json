@@ -36,6 +36,23 @@
       "vercel-react-native-skills",
       "building-native-ui",
       "native-data-fetching"
+    ],
+    "android": [
+      "android-kotlin",
+      "testing-setup"
+    ],
+    "android-compose": [
+      "mobile-android-design",
+      "edge-to-edge"
+    ],
+    "android-device": [
+      "qa-testing-android"
+    ],
+    "android-device-advanced": [
+      "appium"
+    ],
+    "android-camera": [
+      "camerax"
     ]
   },
   "skills": [
@@ -130,6 +147,75 @@
       "why": "Networking móvil, cache, reintentos, tokens y soporte offline en Expo.",
       "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
       "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "android-kotlin",
+      "source": "https://github.com/teachingai/full-stack-skills",
+      "status": "optional",
+      "profiles": ["android"],
+      "why": "Kotlin Android, ciclo de vida, Compose, Gradle Kotlin DSL, navegación y permisos.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Skill comunitaria; las recomendaciones oficiales de Android y las reglas del proyecto tienen precedencia."
+    },
+    {
+      "name": "testing-setup",
+      "source": "https://github.com/android/skills",
+      "status": "recommended",
+      "profiles": ["android"],
+      "why": "Analiza y propone una base de pruebas Android a partir de Gradle y libs.versions.toml.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Skill oficial de Android. No controla dispositivos por sí sola; utiliza las herramientas Android disponibles."
+    },
+    {
+      "name": "mobile-android-design",
+      "source": "https://github.com/wshobson/agents",
+      "status": "optional",
+      "profiles": ["android-compose"],
+      "why": "Material 3, Jetpack Compose, layouts adaptativos, theming y accesibilidad para Android.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15"
+    },
+    {
+      "name": "edge-to-edge",
+      "source": "https://github.com/android/skills",
+      "status": "optional",
+      "profiles": ["android-compose"],
+      "why": "Insets, teclado y edge-to-edge para Compose y Android SDK moderno.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Skill oficial de Android; se sugiere junto con Compose cuando el proyecto lo requiere."
+    },
+    {
+      "name": "qa-testing-android",
+      "source": "https://github.com/vasilyu1983/ai-agents-public",
+      "status": "optional",
+      "profiles": ["android-device"],
+      "why": "Espresso, UIAutomator, Compose UI testing, ADB, emuladores y tareas Gradle para QA Android.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Se propone solo al detectar pruebas instrumentadas; requiere SDK, ADB o emulador configurados."
+    },
+    {
+      "name": "appium",
+      "source": "https://github.com/teachingai/full-stack-skills",
+      "status": "optional",
+      "profiles": ["android-device-advanced"],
+      "why": "Automatización de dispositivos Android/iOS nativos o híbridos mediante Appium.",
+      "audits": {"Gen Agent Trust Hub": "pass", "Socket": "pass", "Snyk": "pass"},
+      "reviewedOn": "2026-08-15",
+      "note": "Perfil avanzado y explícito; no se instala automáticamente por detectar Android."
+    },
+    {
+      "name": "camerax",
+      "source": "https://github.com/android/skills",
+      "status": "optional",
+      "profiles": ["android-camera"],
+      "why": "Patrones Android para cámara cuando el proyecto utiliza CameraX.",
+      "audits": {},
+      "reviewedOn": "2026-08-15",
+      "note": "Skill oficial de Android; se mantiene optativa hasta ampliar la auditoría de la registry."
     }
   ]
 }

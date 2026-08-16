@@ -59,6 +59,36 @@ function containsKey(value, key) {
   return Object.values(value).some((child) => containsKey(child, key));
 }
 
+function checkSkillsLock() {
+  const relativePath = ".harness/skills-lock.json";
+  if (!exists(relativePath)) return;
+  let lock;
+  try {
+    lock = JSON.parse(read(relativePath));
+  } catch (error) {
+    errors.push(`${relativePath}: JSON inválido (${error.message})`);
+    return;
+  }
+  if (lock.version !== 1) errors.push(`${relativePath}: version debe ser 1`);
+  if (!Array.isArray(lock.skills)) {
+    errors.push(`${relativePath}: skills debe ser un array`);
+    return;
+  }
+  for (const skill of lock.skills) {
+    if (!skill?.name || !skill?.source) {
+      errors.push(`${relativePath}: cada skill requiere name y source`);
+      continue;
+    }
+    const candidates = [
+      `.agents/skills/${skill.name}/SKILL.md`,
+      `.opencode/skills/${skill.name}/SKILL.md`
+    ];
+    if (!candidates.some((candidate) => exists(candidate))) {
+      errors.push(`${relativePath}: falta la copia local de ${skill.name}`);
+    }
+  }
+}
+
 for (const relativePath of required) {
   if (!exists(relativePath)) errors.push(`falta ${relativePath}`);
 }
@@ -97,6 +127,7 @@ for (const skill of ["minimal-change", "git-commit", "frontend", "backend", "mob
 if (projectRoot && !exists(".opencode/opencode.json")) {
   warnings.push("El proyecto no parece tener todavía el harness instalado");
 }
+if (projectRoot) checkSkillsLock();
 
 if (errors.length) {
   console.error("DOCTOR: FAIL");

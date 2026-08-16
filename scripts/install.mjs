@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { detectProject } from "./stack-detect.mjs";
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templateRoot = path.join(sourceRoot, "templates", "project");
@@ -54,4 +55,18 @@ if (conflicts.length) {
   console.log(`Instalados ${files.length} archivos.`);
 } else {
   console.log("Vista previa solamente. Repite con --apply para escribir.");
+}
+
+const detection = detectProject(target);
+console.log("\nSKILLS: SUGGEST");
+if (!detection.suggestions.length) {
+  console.log("No se detectó un stack con un perfil registrado.");
+} else {
+  console.log("Perfiles sugeridos según los archivos del proyecto:");
+  for (const suggestion of detection.suggestions) {
+    console.log(`- ${suggestion.profile}: ${suggestion.reason}`);
+    console.log(`  evidencia: ${suggestion.evidence.join(", ")}`);
+  }
+  const profileFlags = detection.suggestions.map(({ profile }) => `--profile ${profile}`).join(" ");
+  console.log(`Instalación explícita: node scripts/skills.mjs install ${profileFlags} --target "${target}" --apply`);
 }

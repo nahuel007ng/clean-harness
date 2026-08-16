@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { detectProject } from "./stack-detect.mjs";
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const registryPath = path.join(sourceRoot, "skills", "registry.json");
@@ -14,6 +15,13 @@ function valueOf(flag) {
   return index >= 0 ? args[index + 1] : null;
 }
 
+function valuesOf(flag) {
+  return args
+    .map((value, index) => value === flag ? args[index + 1] : null)
+    .filter(Boolean)
+    .flatMap((value) => value.split(",").map((item) => item.trim()).filter(Boolean));
+}
+
 function getSkill(name) {
   const skill = registry.skills.find((candidate) => candidate.name === name);
   if (!skill) throw new Error(`Skill no registrada: ${name}`);
@@ -24,6 +32,55 @@ function profileSkills(profile) {
   const names = registry.profiles[profile];
   if (!names) throw new Error(`Perfil no registrado: ${profile}`);
   return names.map(getSkill);
+}
+
+function selectedProfiles() {
+  return valuesOf("--profile");
+}
+
+function selectedSkills(profiles) {
+  const names = [...new Set(profiles.flatMap((profile) => registry.profiles[profile] ?? []))];
+  return names.map(getSkill);
+}
+
+function lockPath(target) {
+  return path.join(target, ".harness", "skills-lock.json");
+}
+
+function writeLock(target, profiles, skills) {
+  const destination = lockPath(target);
+  let previous = {};
+  if (fs.existsSync(destination)) {
+    try {
+      previous = JSON.parse(fs.readFileSync(destination, "utf8"));
+    } catch {
+      previous = {};
+    }
+  }
+
+  const now = new Date().toISOString();
+  const entries = new Map((previous.skills ?? []).map((skill) => [skill.name, skill]));
+  for (const skill of skills) {
+    entries.set(skill.name, {
+      name: skill.name,
+      source: skill.source,
+      status: skill.status,
+      reviewedOn: skill.reviewedOn,
+      installedAt: now
+    });
+  }
+
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.writeFileSync(destination, `${JSON.stringify({
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    version: 1,
+    generatedBy: "clean-harness",
+    agent: registry.policy.agent,
+    updatedAt: now,
+    profiles: [...new Set([...(previous.profiles ?? []), ...profiles])],
+    skills: [...entries.values()].sort((left, right) => left.name.localeCompare(right.name))
+  }, null, 2)}\n`);
+  return destination;
 }
 
 function installCommand(skill) {
@@ -59,21 +116,51 @@ if (command === "show") {
   process.exit(0);
 }
 
-if (command !== "install") {
-  throw new Error("Uso: list | show --profile <perfil> | install --profile <perfil> --target <proyecto> [--apply]");
+if (command === "suggest") {
+  const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
+  const result = detectProject(target);
+  if (args.includes("--json")) {
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(0);
+  }
+
+  console.log("SKILLS: SUGGEST");
+  console.log(`Proyecto: ${result.root}`);
+  console.log(`Archivos inspeccionados: ${result.filesScanned}`);
+  if (!result.suggestions.length) {
+    console.log("No se detectó un stack con un perfil registrado.");
+  } else {
+    for (const suggestion of result.suggestions) {
+      console.log(`- ${suggestion.profile}: ${suggestion.reason}`);
+      console.log(`  evidencia: ${suggestion.evidence.join(", ")}`);
+      for (const skill of profileSkills(suggestion.profile)) {
+        console.log(`  · ${skill.name} [${skill.status}]`);
+      }
+    }
+    console.log("La sugerencia es informativa. No se descarga nada automáticamente.");
+    console.log("Para instalar, repite con uno o más --profile y --apply.");
+  }
+  process.exit(0);
 }
 
-const profile = valueOf("--profile");
+if (command !== "install") {
+  throw new Error("Uso: list | show --profile <perfil> | suggest --target <proyecto> | install --profile <perfil> [--profile <perfil>] --target <proyecto> [--apply]");
+}
+
+const profiles = selectedProfiles();
 const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
 const apply = args.includes("--apply");
 const allowReviewRequired = args.includes("--allow-review-required");
 
-if (!profile) throw new Error("Falta --profile");
+if (!profiles.length) throw new Error("Falta --profile");
 if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
   throw new Error(`El destino no existe o no es un directorio: ${target}`);
 }
 
-const skills = profileSkills(profile);
+for (const profile of profiles) {
+  if (!registry.profiles[profile]) throw new Error(`Perfil no registrado: ${profile}`);
+}
+const skills = selectedSkills(profiles);
 const blocked = skills.filter((skill) => skill.status === "review-required");
 if (blocked.length && !allowReviewRequired) {
   console.error("El perfil contiene skills que requieren revisión explícita:");
@@ -83,7 +170,7 @@ if (blocked.length && !allowReviewRequired) {
 }
 
 console.log(apply ? "SKILLS: APPLY" : "SKILLS: DRY-RUN");
-console.log(`Perfil: ${profile}`);
+console.log(`Perfiles: ${profiles.join(", ")}`);
 console.log(`Proyecto: ${target}`);
 for (const skill of skills) {
   console.log(`- ${skill.name}: npx ${installCommand(skill).join(" ")}`);
@@ -111,4 +198,6 @@ for (const skill of skills) {
     process.exit(result.status ?? 1);
   }
 }
-console.log(`Instaladas ${skills.length} skills del perfil ${profile}.`);
+const lock = writeLock(target, profiles, skills);
+console.log(`Instaladas ${skills.length} skills.`);
+console.log(`Lockfile: ${lock}`);
