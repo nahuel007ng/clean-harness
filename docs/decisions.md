@@ -37,3 +37,11 @@ Las skills de skills.sh son dependencias operativas externas, no parte automáti
 El inicializador inspecciona nombres y contenido de archivos para detectar señales de stack. Muestra perfiles sugeridos, pero no ejecuta herramientas del proyecto ni descarga dependencias automáticamente. La instalación requiere `--apply` y deja un `.harness/skills-lock.json`, de forma que cambiar de modelo no cambie silenciosamente las instrucciones operativas.
 
 Los perfiles Android se separan por necesidad: base Kotlin/Android, Compose y diseño, QA con dispositivo, automatización avanzada y CameraX. La detección no instala todo el pack Android ni confunde una skill con permisos de ADB: el acceso real sigue dependiendo de SDK, emulador, dispositivo y permisos del entorno.
+
+## 10. El acceso externo distingue planificación de ejecución
+
+La configuración global deja `external_directory` en `ask` para que el usuario pueda aprobar acceso externo durante la sesión. El Planner lo puede usar por defecto para leer repositorios relacionados, pero mantiene `edit: deny`; el Executor conserva `external_directory: ask` y requiere aprobación antes de tocar rutas externas. La lectura normal permanece permitida (`read: allow`).
+
+## 11. Los planes persistentes son el contrato entre sesiones
+
+`/pre-plan` sigue siendo un análisis efímero. Cuando una tarea requiere planificación, `/plan` guarda el resultado en `.opencode/plans/YYYY-MM-DD-<slug>.md`. El Planner solo puede escribir dentro de esa carpeta; el archivo contiene el handoff y las verificaciones que una sesión nueva del Executor debe leer antes de editar. Los proyectos deben mantener esos Markdown fuera de las reglas que ignoran la configuración generada. `/execute-plan <ruta>` ofrece el handoff explícito para esa segunda sesión.

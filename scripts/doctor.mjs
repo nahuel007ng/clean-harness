@@ -16,8 +16,10 @@ const required = [
   ".opencode/agents/planner.md",
   ".opencode/agents/executor.md",
   ".opencode/agents/reviewer.md",
+  ".opencode/plans",
   ".opencode/commands/pre-plan.md",
   ".opencode/commands/plan.md",
+  ".opencode/commands/execute-plan.md",
   ".opencode/commands/verify.md",
   ".opencode/commands/review.md",
   ".opencode/skills/minimal-change/SKILL.md",
@@ -50,6 +52,35 @@ function checkFrontmatter(relativePath, keys) {
     if (!new RegExp(`^${key}:`, "m").test(header)) {
       errors.push(`${relativePath}: falta ${key} en frontmatter`);
     }
+  }
+}
+
+function checkFrontmatterPermission(relativePath, key, expected) {
+  if (!exists(relativePath)) return;
+  const content = read(relativePath);
+  const headerEnd = content.indexOf("\n---", 3);
+  if (headerEnd < 0) return;
+  const header = content.slice(0, headerEnd);
+  const pattern = new RegExp(`^  ${key}:\\s*([^\\s#]+)\\s*$`, "m");
+  const match = header.match(pattern);
+  if (!match) {
+    errors.push(`${relativePath}: falta permiso ${key}`);
+  } else if (match[1] !== expected) {
+    errors.push(`${relativePath}: permiso ${key} debe ser ${expected}`);
+  }
+}
+
+function checkFrontmatterPermissionRule(relativePath, key, pattern, expected) {
+  if (!exists(relativePath)) return;
+  const content = read(relativePath);
+  const headerEnd = content.indexOf("\n---", 3);
+  if (headerEnd < 0) return;
+  const header = content.slice(0, headerEnd);
+  const keyPattern = new RegExp(`^  ${key}:\\s*$`, "m");
+  const expectedRule = `    "${pattern}": ${expected}`;
+  const hasRule = header.split(/\r?\n/).some((line) => line === expectedRule);
+  if (!keyPattern.test(header) || !hasRule) {
+    errors.push(`${relativePath}: permiso ${key} para ${pattern} debe ser ${expected}`);
   }
 }
 
@@ -102,6 +133,12 @@ if (exists(".opencode/opencode.json")) {
     if (containsKey(config, "model")) {
       errors.push(".opencode/opencode.json: no debe fijar modelos");
     }
+    if (config.permission?.read !== "allow") {
+      errors.push(".opencode/opencode.json: read debe ser allow");
+    }
+    if (config.permission?.external_directory !== "ask") {
+      errors.push(".opencode/opencode.json: external_directory debe ser ask");
+    }
   } catch (error) {
     errors.push(`.opencode/opencode.json: JSON inválido (${error.message})`);
   }
@@ -110,6 +147,10 @@ if (exists(".opencode/opencode.json")) {
 for (const agent of ["planner", "executor", "reviewer"]) {
   checkFrontmatter(`.opencode/agents/${agent}.md`, ["description", "mode", "permission"]);
 }
+checkFrontmatterPermission(".opencode/agents/planner.md", "external_directory", "allow");
+checkFrontmatterPermission(".opencode/agents/executor.md", "external_directory", "ask");
+checkFrontmatterPermissionRule(".opencode/agents/planner.md", "edit", "*", "deny");
+checkFrontmatterPermissionRule(".opencode/agents/planner.md", "edit", ".opencode/plans/*.md", "allow");
 for (const command of ["pre-plan", "plan", "verify", "review"]) {
   checkFrontmatter(`.opencode/commands/${command}.md`, ["description"]);
 }

@@ -11,6 +11,7 @@ Harness V5 portable para OpenCode. Está diseñado para conservar reglas, permis
 - La documentación solo se actualiza cuando el cambio deja conocimiento durable.
 - Los commits automáticos son locales, atómicos y posteriores a una verificación exitosa.
 - Las migraciones requieren manifiesto explícito, *dry-run* y `--apply`.
+- El Planner puede leer directorios externos para analizar dependencias; el Executor requiere aprobación de sesión para acceder a ellos.
 
 ## Estado
 
@@ -36,7 +37,8 @@ El instalador no sobrescribe archivos existentes. La migración tampoco mueve na
 ## Comandos disponibles en OpenCode
 
 - `/pre-plan`: análisis breve y clasificación de la tarea.
-- `/plan`: plan explícito para cambios no directos.
+- `/plan`: crea y guarda un plan persistente en `.opencode/plans/YYYY-MM-DD-<slug>.md`.
+- `/execute-plan <ruta>`: entrega un plan persistente a una sesión nueva del Executor.
 - `/verify`: ejecuta o propone verificaciones sin editar.
 - `/review`: revisión independiente del diff actual.
 

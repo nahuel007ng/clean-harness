@@ -5,6 +5,7 @@
 - Lee este archivo y localiza la implementación real, sus callers y sus tests.
 - Decide si la tarea es directa, planificada o crítica.
 - Usa `/pre-plan` solo si el alcance, el riesgo o la incertidumbre lo justifican.
+- Cuando una tarea sea planificada o crítica, usa `/plan` para guardar el plan en `.opencode/plans/` y entrega su ruta al Executor.
 - Carga una skill de dominio solo cuando la tarea corresponda a ella.
 - Las skills externas se instalan desde el registro del harness, a nivel de proyecto y con revisión explícita.
 
