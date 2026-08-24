@@ -45,3 +45,7 @@ La configuración global deja `external_directory` en `ask` para que el usuario 
 ## 11. Los planes persistentes son el contrato entre sesiones
 
 `/pre-plan` sigue siendo un análisis efímero. Cuando una tarea requiere planificación, `/plan` guarda el resultado en `.opencode/plans/YYYY-MM-DD-<slug>.md`. El Planner solo puede escribir dentro de esa carpeta; el archivo contiene el handoff y las verificaciones que una sesión nueva del Executor debe leer antes de editar. Los proyectos deben mantener esos Markdown fuera de las reglas que ignoran la configuración generada. `/execute-plan <ruta>` ofrece el handoff explícito para esa segunda sesión.
+
+## 12. El estado del plan vive en el plan
+
+Cada plan declara su estado en el frontmatter (`pendiente`, `en progreso`, `concluido`). El Executor lo mueve a `en progreso` al comenzar y a `concluido` al terminar con verificación, añadiendo entonces la sección final `## Historial de commits` con los commits generados bajo ese plan. Así el archivo responde por sí mismo qué trabajo está activo, evita retomar planes ya cerrados y deja evidencia de qué commits corresponden a cada plan sin depender de la memoria de una sesión.

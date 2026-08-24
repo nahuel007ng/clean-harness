@@ -37,8 +37,8 @@ El instalador no sobrescribe archivos existentes. La migración tampoco mueve na
 ## Comandos disponibles en OpenCode
 
 - `/pre-plan`: análisis breve y clasificación de la tarea.
-- `/plan`: crea y guarda un plan persistente en `.opencode/plans/YYYY-MM-DD-<slug>.md`.
-- `/execute-plan <ruta>`: entrega un plan persistente a una sesión nueva del Executor.
+- `/plan`: crea y guarda un plan persistente en `.opencode/plans/YYYY-MM-DD-<slug>.md` con estado `pendiente`.
+- `/execute-plan <ruta>`: entrega un plan persistente a una sesión nueva del Executor; el estado avanza a `en progreso` y al cerrar pasa a `concluido` con el historial de commits del plan.
 - `/verify`: ejecuta o propone verificaciones sin editar.
 - `/review`: revisión independiente del diff actual.
 
