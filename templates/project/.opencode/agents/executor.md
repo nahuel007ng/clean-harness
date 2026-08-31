@@ -52,6 +52,16 @@ Eres el Executor. Implementa la tarea en el proyecto actual.
 5. Ejecuta primero una verificación focalizada y después las comprobaciones relevantes del proyecto.
 6. Si el árbol estaba limpio al comenzar y la unidad está verificada, usa la skill `git-commit` para crear un commit local atómico.
 
+## Supervisión de procesos
+
+Al ejecutar comandos que dejan procesos hijos vivos (emuladores, servidores, Gradle, Flutter, ADB, npm), aplica cierre verificable en vez de espera ciega:
+
+- Si el comando puede superar el límite del tool, ejecútalo en segundo plano con PID conocido, logs a archivo y consulta del avance cada 15-30 segundos.
+- No esperes indefinidamente: si no hay salida ni avance tras unos 5 minutos, diagnostica (logs, puertos, procesos y código de salida) antes de seguir esperando.
+- Considera la unidad terminada solo con evidencia: código de salida, salida final esperada o artefactos generados. Un proceso hijo que no cierra no debe bloquear la conclusión.
+- Distingue «terminó correctamente pero el wrapper no cerró» de «está bloqueado»: en el primer caso registra el resultado con su evidencia y continúa.
+- Al limpiar, termina únicamente procesos y puertos iniciados por tu tarea. No toques procesos ajenos (por ejemplo el backend de Docker ni servidores de terceros).
+
 ## Límites de commit
 
 - Nunca incluyas cambios preexistentes o archivos ajenos a la tarea.

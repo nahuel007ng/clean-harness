@@ -46,6 +46,10 @@ El instalador no sobrescribe archivos existentes. La migración tampoco mueve na
 
 Las skills externas no se instalan automáticamente. Al inicializar el harness se inspeccionan los archivos del proyecto y se muestran perfiles sugeridos. Consulta [docs/skills.md](docs/skills.md), revisa la propuesta y usa `node scripts/skills.mjs install` con `--apply` para instalarla. Las instalaciones exitosas quedan registradas en `.harness/skills-lock.json`.
 
+## Portabilidad a otros TUI
+
+La codificación de este harness es para OpenCode, pero el núcleo (roles, planes, verificación y commits) no está atado a él. Para usar el harness en otro TUI —Codex, Claude Code, Cursor u otro— sigue [docs/tui-portabilidad.md](docs/tui-portabilidad.md): incluye el mapa de conceptos, la intención de permisos, el procedimiento de adaptación y un ejemplo con Codex.
+
 ## Fuentes de diseño
 
 - [OpenCode agents](https://opencode.ai/docs/agents/)

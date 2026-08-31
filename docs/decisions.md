@@ -49,3 +49,11 @@ La configuración global deja `external_directory` en `ask` para que el usuario 
 ## 12. El estado del plan vive en el plan
 
 Cada plan declara su estado en el frontmatter (`pendiente`, `en progreso`, `concluido`). El Executor lo mueve a `en progreso` al comenzar y a `concluido` al terminar con verificación, añadiendo entonces la sección final `## Historial de commits` con los commits generados bajo ese plan. Así el archivo responde por sí mismo qué trabajo está activo, evita retomar planes ya cerrados y deja evidencia de qué commits corresponden a cada plan sin depender de la memoria de una sesión.
+
+## 13. El harness es portable entre TUI
+
+La codificación de OpenCode (`.opencode`, frontmatter `mode`/`permission`, comandos con `$ARGUMENTS`, `compatibility`) es la referencia, no un límite. El núcleo —reglas de trabajo, roles, planes con estado, verificación y política de commits— se conserva al portar el harness a otro TUI; cambian solo los mecanismos de cada herramienta (archivo de reglas, configuración y permisos, agentes, comandos, skills y ruta de planes). El procedimiento de adaptación, la tabla de intención de permisos y el ejemplo de Codex viven en `docs/tui-portabilidad.md`. Un puerto propio debe seguir esa guía y documentarse como decisión durable, sin modificar las plantillas de OpenCode del núcleo.
+
+## 14. El cierre de procesos se verifica, no se espera
+
+Los comandos con procesos hijos (emuladores, servidores, Gradle, Flutter, ADB, npm) pueden terminar su trabajo real y dejar vivo el wrapper, el hub o un proceso huérfano; esperar su salida en foreground puede bloquear al Executor indefinidamente aunque la tarea ya haya terminado. Por eso el Executor aplica cierre verificable: ejecución en segundo plano con PID y logs cuando corresponde, consulta de avance, comprobación posterior de salida esperada, artefactos, puertos y procesos, limpieza limitada a lo iniciado por la tarea y distinción entre «terminó correctamente pero el wrapper no cerró» y «está bloqueado». Esta política vive en el agente Executor, aplica a cualquier stack y no depende de conocer el dominio concreto.

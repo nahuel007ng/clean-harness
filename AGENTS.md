@@ -10,6 +10,7 @@ Este repositorio contiene el harness portable, no el harness de un proyecto conc
 - Verificar cada cambio con `node scripts/doctor.mjs`.
 - No ejecutar migraciones reales durante el desarrollo del harness.
 - Los cambios del harness deben documentar únicamente decisiones durables.
+- Para portar el harness a otro TUI, seguir `docs/tui-portabilidad.md`; las plantillas de OpenCode no se modifican por un puerto.
 
 ## Límites
 
