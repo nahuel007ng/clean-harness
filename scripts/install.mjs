@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { detectProject } from "./stack-detect.mjs";
 import { detectLegacy } from "./detect-legacy.mjs";
+import { INTERNAL_SKILLS, VALID_AGENTS, isValidAgent, valueOf, valuesOfLower } from "./lib/args.mjs";
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const coreRoot = path.join(sourceRoot, "templates", "core");
@@ -10,24 +11,12 @@ const adaptersRoot = path.join(sourceRoot, "templates", "adapters");
 const legacyRoot = path.join(sourceRoot, "templates", "project");
 const args = process.argv.slice(2);
 
-function valuesOf(flag) {
-  return args
-    .map((value, index) => value === flag ? args[index + 1] : null)
-    .filter(Boolean)
-    .flatMap((value) => value.split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
-}
-
-function valueOf(flag) {
-  const index = args.indexOf(flag);
-  return index >= 0 ? args[index + 1] : null;
-}
-
-const targetRaw = valueOf("--target");
+const targetRaw = valueOf(args, "--target");
 const target = targetRaw ? path.resolve(targetRaw) : null;
 const apply = args.includes("--apply");
-const requestedAgents = valuesOf("--agent");
-const agents = [...new Set(requestedAgents.length ? requestedAgents : ["opencode", "codex", "antigravity"])];
-const validAgents = new Set(["opencode", "codex", "antigravity"]);
+const requestedAgents = valuesOfLower(args, "--agent");
+const agents = [...new Set(requestedAgents.length ? requestedAgents : [...VALID_AGENTS])];
+const validAgents = new Set(VALID_AGENTS);
 
 if (!target) {
   console.error("Uso: node scripts/install.mjs --target <proyecto> [--agent opencode,codex,antigravity] [--apply]");
@@ -38,7 +27,7 @@ if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
   process.exit(2);
 }
 for (const agent of agents) {
-  if (!validAgents.has(agent)) {
+  if (!isValidAgent(agent)) {
     console.error(`Agente no soportado: ${agent} (soportados: opencode, codex, antigravity)`);
     process.exit(2);
   }
@@ -51,7 +40,7 @@ if (!useCore && !fs.existsSync(legacyRoot)) {
   process.exit(2);
 }
 
-const internalSkills = ["minimal-change", "git-commit", "frontend", "backend", "mobile"];
+const internalSkills = [...INTERNAL_SKILLS];
 
 // Mapa destino -> origen absoluto (solo proyecto, nunca global).
 function buildFileMap() {
@@ -133,7 +122,7 @@ for (const [relative] of files) {
 if (conflicts.length) {
   console.error("No se instalaron archivos: existen destinos que no se sobrescribirán.");
   console.error("Archiva o resuelve esos archivos y vuelve a ejecutar el instalador.");
-  process.exitCode = 1;
+  process.exit(1);
 } else if (apply) {
   for (const [relative, src] of files) {
     const destination = path.join(target, relative);

@@ -1,13 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { valueOf } from "./lib/args.mjs";
 
 const args = process.argv.slice(2);
-const valueOf = (flag) => {
-  const index = args.indexOf(flag);
-  return index >= 0 ? args[index + 1] : null;
-};
-const target = valueOf("--target") ? path.resolve(valueOf("--target")) : null;
-const manifestPath = valueOf("--manifest") ? path.resolve(valueOf("--manifest")) : null;
+const targetRaw = valueOf(args, "--target");
+const manifestRaw = valueOf(args, "--manifest");
+const target = targetRaw ? path.resolve(targetRaw) : null;
+const manifestPath = manifestRaw ? path.resolve(manifestRaw) : null;
 const apply = args.includes("--apply");
 
 if (!target || !manifestPath) {
@@ -32,8 +31,18 @@ try {
 }
 
 const archiveDir = manifest.archiveDir ?? ".harness-archive";
-const protectedSegments = new Set((manifest.protectedSegments ?? []).map((segment) => segment.toLowerCase()));
-const entries = Array.isArray(manifest.paths) ? manifest.paths : [];
+if (!Array.isArray(manifest.paths) || !manifest.paths.length) {
+  console.error("MIGRATE: FAIL");
+  console.error("- El manifiesto debe incluir un array no vacío en paths");
+  process.exit(1);
+}
+if (!Array.isArray(manifest.protectedSegments)) {
+  console.error("MIGRATE: FAIL");
+  console.error("- protectedSegments debe ser un array");
+  process.exit(1);
+}
+const protectedSegments = new Set(manifest.protectedSegments.map((segment) => String(segment).toLowerCase()));
+const entries = manifest.paths;
 const errors = [];
 const plan = [];
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -42,8 +51,14 @@ function safeRelative(relative) {
   if (typeof relative !== "string" || !relative.trim()) return false;
   if (path.isAbsolute(relative)) return false;
   const normalized = path.normalize(relative);
-  if (normalized === ".." || normalized.startsWith(`..${path.sep}`)) return false;
+  if (normalized === "." || normalized === ".." || normalized.startsWith(`..${path.sep}`)) return false;
   return true;
+}
+
+if (!safeRelative(archiveDir)) {
+  console.error("MIGRATE: FAIL");
+  console.error(`- archiveDir inseguro: ${archiveDir}`);
+  process.exit(1);
 }
 
 for (const entry of entries) {

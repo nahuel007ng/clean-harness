@@ -2,24 +2,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { detectProject } from "./stack-detect.mjs";
+import { valueOf, valuesOfLower } from "./lib/args.mjs";
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const registryPath = path.join(sourceRoot, "skills", "registry.json");
-const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+let registry;
+try {
+  registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+} catch (error) {
+  console.error(`No se pudo leer skills/registry.json: ${error.message}`);
+  process.exit(2);
+}
 const args = process.argv.slice(2);
 const command = args[0] ?? "list";
-
-function valueOf(flag) {
-  const index = args.indexOf(flag);
-  return index >= 0 ? args[index + 1] : null;
-}
-
-function valuesOf(flag) {
-  return args
-    .map((value, index) => value === flag ? args[index + 1] : null)
-    .filter(Boolean)
-    .flatMap((value) => value.split(",").map((item) => item.trim()).filter(Boolean));
-}
 
 function getSkill(name) {
   const skill = registry.skills.find((candidate) => candidate.name === name);
@@ -34,7 +29,7 @@ function profileSkills(profile) {
 }
 
 function selectedProfiles() {
-  return valuesOf("--profile");
+  return valuesOfLower(args, "--profile");
 }
 
 function selectedSkills(profiles) {
@@ -104,14 +99,16 @@ if (command === "list") {
 }
 
 if (command === "show") {
-  const profile = valueOf("--profile") ?? args[1];
+  const rawProfile = valueOf(args, "--profile") ?? args[1];
+  const profile = rawProfile?.toLowerCase();
   if (!profile) throw new Error("Uso: node scripts/skills.mjs show --profile <perfil>");
   for (const skill of profileSkills(profile)) printSkill(skill);
   process.exit(0);
 }
 
 if (command === "suggest") {
-  const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
+  const targetRaw = valueOf(args, "--target");
+  const target = targetRaw ? path.resolve(targetRaw) : process.cwd();
   const result = detectProject(target);
   if (args.includes("--json")) {
     console.log(JSON.stringify(result, null, 2));
@@ -137,9 +134,10 @@ if (command === "suggest") {
 }
 
 if (command === "record") {
-  const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
-  const name = valueOf("--skill");
-  const source = valueOf("--source");
+  const targetRaw = valueOf(args, "--target");
+  const target = targetRaw ? path.resolve(targetRaw) : process.cwd();
+  const name = valueOf(args, "--skill");
+  const source = valueOf(args, "--source");
   const apply = args.includes("--apply");
   if (!name || !source) throw new Error("Uso: node scripts/skills.mjs record --skill <nombre> --source <url> [--profile <perfil>] --target <proyecto> [--apply]");
   if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
@@ -166,7 +164,8 @@ if (command !== "install") {
 }
 
 const profiles = selectedProfiles();
-const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
+const targetRaw = valueOf(args, "--target");
+const target = targetRaw ? path.resolve(targetRaw) : process.cwd();
 const apply = args.includes("--apply");
 const allowReviewRequired = args.includes("--allow-review-required");
 

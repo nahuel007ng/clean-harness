@@ -1,26 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { INTERNAL_SKILLS, VALID_AGENTS, isValidAgent, valueOf, valuesOfLower } from "./lib/args.mjs";
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 
-function valuesOf(flag) {
-  return args
-    .map((value, index) => value === flag ? args[index + 1] : null)
-    .filter(Boolean)
-    .flatMap((value) => value.split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
+const projectRaw = valueOf(args, "--project");
+const projectRoot = projectRaw ? path.resolve(projectRaw) : null;
+if (projectRaw && (!fs.existsSync(projectRoot) || !fs.statSync(projectRoot).isDirectory())) {
+  console.error(`El proyecto no existe o no es un directorio: ${projectRoot}`);
+  process.exit(2);
 }
-
-const projectIndex = args.indexOf("--project");
-const projectRoot = projectIndex >= 0 && args[projectIndex + 1]
-  ? path.resolve(args[projectIndex + 1])
-  : null;
-const requestedAgents = valuesOf("--agent");
-const validAgents = new Set(["opencode", "codex", "antigravity"]);
+const requestedAgents = valuesOfLower(args, "--agent");
+const validAgents = new Set(VALID_AGENTS);
 
 for (const agent of requestedAgents) {
-  if (!validAgents.has(agent)) {
+  if (!isValidAgent(agent)) {
     console.error(`Agente no soportado: ${agent} (soportados: opencode, codex, antigravity)`);
     process.exit(2);
   }
@@ -222,7 +218,7 @@ if (projectRoot) {
   }
   if (!exists(".harness/memory/decisions.md")) warnings.push("falta .harness/memory/decisions.md (memoria file-based)");
   if (!exists(".harness/memory/fixes.md")) warnings.push("falta .harness/memory/fixes.md (memoria file-based)");
-  const internalSkills = ["minimal-change", "git-commit", "frontend", "backend", "mobile"];
+  const internalSkills = [...INTERNAL_SKILLS];
   for (const skill of internalSkills) {
     const candidates = [
       `.agents/skills/${skill}/SKILL.md`,

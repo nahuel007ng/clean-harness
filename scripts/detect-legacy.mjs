@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { valueOf } from "./lib/args.mjs";
 
 function readSafe(absolute) {
   try {
@@ -72,13 +73,10 @@ export function detectLegacy(target) {
 }
 
 const args = process.argv.slice(2);
-function valueOf(flag) {
-  const index = args.indexOf(flag);
-  return index >= 0 ? args[index + 1] : null;
-}
 
 if (process.argv[1]?.endsWith("detect-legacy.mjs")) {
-  const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
+  const targetRaw = valueOf(args, "--target");
+  const target = targetRaw ? path.resolve(targetRaw) : process.cwd();
   const json = args.includes("--json");
   const result = detectLegacy(target);
   if (json) {
