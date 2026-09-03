@@ -1,4 +1,6 @@
-# Portabilidad a otros TUI
+# Portabilidad a otros TUI (referencia V5 — para V6 seguir `portar-v6.md`)
+
+> Referencia histórica V5. El procedimiento vigente es `docs/portar-v6.md`; la ruta de planes vigente es `.harness/plans/` (no configurable por puerto).
 
 El harness V5 está codificado para OpenCode, pero su núcleo no depende de él. Esta guía explica como adaptarlo para usarlo en otro TUI (por ejemplo Codex, Claude Code, Cursor o Gemini CLI) sin cambiar las reglas de trabajo.
 

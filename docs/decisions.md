@@ -1,8 +1,8 @@
-# Decisiones del harness V5
+# Decisiones del harness
 
 ## 1. El harness es portable y el modelo es intercambiable
 
-Las plantillas no fijan proveedor ni modelo. El modelo se selecciona en OpenCode según la tarea y el contexto disponible.
+Las plantillas no fijan proveedor ni modelo. El modelo se selecciona en el TUI activo según la tarea y el contexto disponible.
 
 ## 2. Los roles representan permisos y responsabilidades
 
@@ -14,7 +14,7 @@ Las tareas directas pueden ir de ejecución a verificación. El plan y la revisi
 
 ## 4. El repositorio es la fuente de verdad operativa
 
-Las reglas activas viven en `AGENTS.md`, la configuración en `.opencode` y las comprobaciones en los scripts y tests del proyecto. El vault no forma parte del runtime del harness.
+Las reglas activas viven en `AGENTS.md`, la configuración en `templates/core/` + `templates/adapters/<tui>/` y las comprobaciones en los scripts y tests del proyecto. El vault no forma parte del runtime del harness.
 
 ## 5. La simplificación es una skill, no una inyección global
 
@@ -44,7 +44,7 @@ La configuración global deja `external_directory` en `ask` para que el usuario 
 
 ## 11. Los planes persistentes son el contrato entre sesiones
 
-`/pre-plan` sigue siendo un análisis efímero. Cuando una tarea requiere planificación, `/plan` guarda el resultado en `.opencode/plans/YYYY-MM-DD-<slug>.md`. El Planner solo puede escribir dentro de esa carpeta; el archivo contiene el handoff y las verificaciones que una sesión nueva del Executor debe leer antes de editar. Los proyectos deben mantener esos Markdown fuera de las reglas que ignoran la configuración generada. `/execute-plan <ruta>` ofrece el handoff explícito para esa segunda sesión.
+`/pre-plan` sigue siendo un análisis efímero. Cuando una tarea requiere planificación, `/plan` guarda el resultado en `.harness/plans/YYYY-MM-DD-<slug>.md`. El Planner solo puede escribir dentro de esa carpeta; el archivo contiene el handoff y las verificaciones que una sesión nueva del Executor debe leer antes de editar. Los proyectos deben mantener esos Markdown fuera de las reglas que ignoran la configuración generada. `/execute-plan <ruta>` ofrece el handoff explícito para esa segunda sesión.
 
 ## 12. El estado del plan vive en el plan
 
@@ -52,7 +52,7 @@ Cada plan declara su estado en el frontmatter (`pendiente`, `en progreso`, `conc
 
 ## 13. El harness es portable entre TUI
 
-La codificación de OpenCode (`.opencode`, frontmatter `mode`/`permission`, comandos con `$ARGUMENTS`, `compatibility`) es la referencia, no un límite. El núcleo —reglas de trabajo, roles, planes con estado, verificación y política de commits— se conserva al portar el harness a otro TUI; cambian solo los mecanismos de cada herramienta (archivo de reglas, configuración y permisos, agentes, comandos, skills y ruta de planes). El procedimiento de adaptación, la tabla de intención de permisos y el ejemplo de Codex viven en `docs/tui-portabilidad.md`. Un puerto propio debe seguir esa guía y documentarse como decisión durable, sin modificar las plantillas de OpenCode del núcleo.
+La codificación de OpenCode (`.opencode`, frontmatter `mode`/`permission`, comandos con `$ARGUMENTS`, `compatibility`) es la referencia, no un límite. El núcleo —reglas de trabajo, roles, planes con estado, verificación y política de commits— se conserva al portar el harness a otro TUI; cambian solo los mecanismos de cada herramienta (archivo de reglas, configuración y permisos, agentes, comandos, skills y ruta de planes). El procedimiento de adaptación vive en `docs/portar-v6.md`; `docs/tui-portabilidad.md` queda como referencia V5. Un puerto propio debe seguir `portar-v6.md` y documentarse como decisión durable, sin modificar las plantillas de OpenCode del núcleo.
 
 ## 14. El cierre de procesos se verifica, no se espera
 
@@ -80,8 +80,8 @@ El port lo ejecuta el modelo dentro del repo destino con docs/bootstrap-v6.md: i
 
 ## 20. Skills V6: suggest + record, cero descargas en el port
 
-suggest es informativo sin red; install/record --apply solo escriben .harness/skills-lock.json tras instalacion manual aprobada. find-skills es opcional con gate review-required y nunca se preinstala.
+suggest es informativo sin red; install/record --apply solo escriben .harness/skills-lock.json tras instalacion manual aprobada. `find-skills` es descubrimiento opcional con gate review-required, no está en `registry.json` y nunca se preinstala.
 
 ## 21. Migrate omite rutas inexistentes y templates/project se elimina en V6
 
-migrate.mjs omite con aviso las rutas del manifiesto que no existen en vez de fallar: el manifiesto ejemplo cubre los 7 rastros posibles y cada proyecto solo tiene algunos. La fuente unica pasa a templates/core/ + templates/adapters/<tui>/; templates/project/ (V5) se elimina para evitar doble fuente de verdad.
+migrate.mjs omite con aviso las rutas del manifiesto que no existen en vez de fallar: el manifiesto ejemplo `migrations/manifest.v5-v6.example.json` cubre los 7 rastros posibles y cada proyecto solo tiene algunos. La fuente unica pasa a templates/core/ + templates/adapters/<tui>/; templates/project/ (V5) se elimina para evitar doble fuente de verdad.

@@ -6,7 +6,7 @@ Harness V6 portable multi-TUI (OpenCode, Codex, Antigravity). Núcleo agnóstico
 
 - Tres responsabilidades: Planner, Executor y Reviewer.
 - Frontend, backend y mobile son skills, no agentes permanentes.
-- El modelo se selecciona desde OpenCode; el repositorio no contiene IDs de modelos.
+- El modelo se selecciona en el TUI activo; el repositorio no contiene IDs de modelos.
 - `pre-plan` es opcional.
 - La documentación solo se actualiza cuando el cambio deja conocimiento durable.
 - Los commits automáticos son locales, atómicos y posteriores a una verificación exitosa.
