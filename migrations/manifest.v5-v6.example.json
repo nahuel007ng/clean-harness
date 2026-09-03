@@ -1,0 +1,47 @@
+{
+  "archiveDir": ".harness-archive",
+  "protectedSegments": [
+    "docs",
+    "wiki",
+    "vault",
+    "knowledge",
+    ".kb"
+  ],
+  "paths": [
+    {
+      "path": ".opencode",
+      "kind": "harness",
+      "reason": "Configuración y agentes del harness anterior (V5)"
+    },
+    {
+      "path": ".agents",
+      "kind": "harness",
+      "reason": "Skills y soporte del harness anterior (V5)"
+    },
+    {
+      "path": ".codex",
+      "kind": "harness",
+      "reason": "Prompts del harness anterior"
+    },
+    {
+      "path": ".gemini",
+      "kind": "harness",
+      "reason": "Skills del harness anterior"
+    },
+    {
+      "path": ".harness",
+      "kind": "harness",
+      "reason": "Planes/memoria/lock del harness anterior (importar selectivo tras archivar)"
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "harness",
+      "reason": "Reglas del harness anterior (respaldar; reimportar solo build/test/lint del proyecto)"
+    },
+    {
+      "path": "GEMINI.md",
+      "kind": "harness",
+      "reason": "Fragmento del harness anterior (respaldar antes de regenerar)"
+    }
+  ]
+}

@@ -73,7 +73,7 @@ for (const entry of entries) {
     continue;
   }
   if (!fs.existsSync(source)) {
-    errors.push(`No existe: ${entry.path}`);
+    console.log(`- omitida (no existe): ${entry.path}`);
     continue;
   }
   if (fs.existsSync(destination)) {

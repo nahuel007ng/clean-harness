@@ -1,6 +1,6 @@
 # clean-harness
 
-Harness V5 portable para OpenCode. Está diseñado para conservar reglas, permisos y verificaciones mientras los modelos pueden cambiar.
+Harness V6 portable multi-TUI (OpenCode, Codex, Antigravity). Núcleo agnóstico en `templates/core/` + adapters por TUI en `templates/adapters/<tui>/`. Diseñado para conservar reglas, permisos y verificaciones mientras los modelos pueden cambiar. Solo escribe dentro del proyecto, nunca en config global.
 
 ## Principios
 
@@ -24,31 +24,28 @@ Desde este repositorio:
 ```text
 node scripts/doctor.mjs
 node scripts/install.mjs --target C:\ruta\al\proyecto
+node scripts/install.mjs --agent codex --target C:\ruta\al\proyecto
 node scripts/install.mjs --target C:\ruta\al\proyecto --apply
 node scripts/doctor.mjs --project C:\ruta\al\proyecto
 node scripts/skills.mjs suggest --target C:\ruta\al\proyecto
-node scripts/skills.mjs install --profile android --profile android-compose --target C:\ruta\al\proyecto --apply
+node scripts/skills.mjs record --skill <nombre> --source <url> --target C:\ruta\al\proyecto --apply
 node scripts/migrate.mjs --target C:\ruta\al\proyecto --manifest C:\ruta\manifest.json
 node scripts/migrate.mjs --target C:\ruta\al\proyecto --manifest C:\ruta\manifest.json --apply
 ```
 
 El instalador no sobrescribe archivos existentes. La migración tampoco mueve nada sin `--apply`.
 
-## Comandos disponibles en OpenCode
+## Comandos disponibles (según adapter)
 
-- `/pre-plan`: análisis breve y clasificación de la tarea.
-- `/plan`: crea y guarda un plan persistente en `.opencode/plans/YYYY-MM-DD-<slug>.md` con estado `pendiente`.
-- `/execute-plan <ruta>`: entrega un plan persistente a una sesión nueva del Executor; el estado avanza a `en progreso` y al cerrar pasa a `concluido` con el historial de commits del plan.
-- `/verify`: ejecuta o propone verificaciones sin editar.
-- `/review`: revisión independiente del diff actual.
+OpenCode: `/pre-plan`, `/plan`, `/execute-plan <ruta>`, `/verify`, `/review`. Codex/Antigravity: mismos flujos vía prompts del adapter (`.codex/prompts/`, `GEMINI.md` + workflows). Los planes viven en `.harness/plans/YYYY-MM-DD-<slug>.md` con estado `pendiente/en progreso/concluido` e historial de commits.
 
 ## Skills externas
 
-Las skills externas no se instalan automáticamente. Al inicializar el harness se inspeccionan los archivos del proyecto y se muestran perfiles sugeridos. Consulta [docs/skills.md](docs/skills.md), revisa la propuesta y usa `node scripts/skills.mjs install` con `--apply` para instalarla. Las instalaciones exitosas quedan registradas en `.harness/skills-lock.json`.
+Las skills externas no se instalan automáticamente (cero descargas en el port). Al inicializar el harness se inspeccionan los archivos del proyecto y se muestran perfiles sugeridos. Consulta [docs/skills.md](docs/skills.md) y [templates/core/skills-recomendadas.md](templates/core/skills-recomendadas.md), instala manualmente tras aprobar y registra con `node scripts/skills.mjs record` o `install --apply` (solo escribe el lock). Las instalaciones quedan registradas en `.harness/skills-lock.json`.
 
-## Portabilidad a otros TUI
+## Portabilidad y bootstrap por TUI
 
-La codificación de este harness es para OpenCode, pero el núcleo (roles, planes, verificación y commits) no está atado a él. Para usar el harness en otro TUI —Codex, Claude Code, Cursor u otro— sigue [docs/tui-portabilidad.md](docs/tui-portabilidad.md): incluye el mapa de conceptos, la intención de permisos, el procedimiento de adaptación y un ejemplo con Codex.
+El núcleo (`templates/core/`: roles, planes, verificación y commits) no está atado a ningún TUI. Cada TUI vive en `templates/adapters/<tui>/`. Para portar a otro TUI, seguir `docs/portar-v6.md` (guía TUI-first con investigación previa); `docs/tui-portabilidad.md` queda como referencia V5. Para instalar desde el propio TUI destino (ej. abrir Codex en el repo y pedir el port), usar los prompts copiables de `docs/bootstrap-v6.md`: inventarían legacy, archivan V4/V5 a `.harness-archive/` con manifiesto y hacen init fresco project-local con import curado.
 
 ## Fuentes de diseño
 

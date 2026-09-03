@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { detectProject } from "./stack-detect.mjs";
 
@@ -64,8 +63,8 @@ function writeLock(target, profiles, skills) {
     entries.set(skill.name, {
       name: skill.name,
       source: skill.source,
-      status: skill.status,
-      reviewedOn: skill.reviewedOn,
+      status: skill.status ?? "recommended",
+      reviewedOn: skill.reviewedOn ?? now.slice(0, 10),
       installedAt: now
     });
   }
@@ -83,14 +82,8 @@ function writeLock(target, profiles, skills) {
   return destination;
 }
 
-function installCommand(skill) {
-  return [
-    "skills", "add", skill.source,
-    "--skill", skill.name,
-    "--agent", registry.policy.agent,
-    "--copy",
-    "--yes"
-  ];
+function manualCommand(skill) {
+  return `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx skills add ${skill.source} --skill ${skill.name} --copy --yes`;
 }
 
 function printSkill(skill) {
@@ -98,8 +91,9 @@ function printSkill(skill) {
   console.log(`  fuente: ${skill.source}`);
   console.log(`  motivo: ${skill.why}`);
   if (skill.note) console.log(`  nota: ${skill.note}`);
-  console.log(`  auditorías: ${Object.entries(skill.audits).map(([name, status]) => `${name}=${status}`).join(", ")}`);
-  console.log(`  comando: npx ${installCommand(skill).join(" ")}`);
+  console.log(`  auditorías: ${Object.entries(skill.audits ?? {}).map(([name, status]) => `${name}=${status}`).join(", ") || "ver skills.sh"}`);
+  console.log(`  manual: ${manualCommand(skill)}`);
+  console.log(`  destino: .agents/skills/${skill.name}/ (+ espejo del adapter activo)`);
 }
 
 if (command === "list") {
@@ -137,14 +131,38 @@ if (command === "suggest") {
         console.log(`  · ${skill.name} [${skill.status}]`);
       }
     }
-    console.log("La sugerencia es informativa. No se descarga nada automáticamente.");
-    console.log("Para instalar, repite con uno o más --profile y --apply.");
+    console.log("La sugerencia es informativa. Cero descargas. Instala manualmente tras aprobar y registra con install/record --apply.");
   }
   process.exit(0);
 }
 
+if (command === "record") {
+  const target = valueOf("--target") ? path.resolve(valueOf("--target")) : process.cwd();
+  const name = valueOf("--skill");
+  const source = valueOf("--source");
+  const apply = args.includes("--apply");
+  if (!name || !source) throw new Error("Uso: node scripts/skills.mjs record --skill <nombre> --source <url> [--profile <perfil>] --target <proyecto> [--apply]");
+  if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
+    throw new Error(`El destino no existe o no es un directorio: ${target}`);
+  }
+  const profiles = selectedProfiles();
+  const skill = { name, source, status: "recommended", reviewedOn: new Date().toISOString().slice(0, 10) };
+  console.log(apply ? "SKILLS: RECORD-APPLY" : "SKILLS: RECORD-DRY-RUN");
+  console.log(`Skill: ${name}`);
+  console.log(`Fuente: ${source}`);
+  console.log(`Copia local esperada: .agents/skills/${name}/SKILL.md (o espejo del adapter)`);
+  if (!apply) {
+    console.log("Vista previa solamente. Instala manualmente la skill y repite con --apply para registrar.");
+    process.exit(0);
+  }
+  const lock = writeLock(target, profiles, [skill]);
+  console.log(`Registrada ${name}.`);
+  console.log(`Lockfile: ${lock}`);
+  process.exit(0);
+}
+
 if (command !== "install") {
-  throw new Error("Uso: list | show --profile <perfil> | suggest --target <proyecto> | install --profile <perfil> [--profile <perfil>] --target <proyecto> [--apply]");
+  throw new Error("Uso: list | show --profile <perfil> | suggest --target <proyecto> | install --profile <perfil> [--profile <perfil>] --target <proyecto> [--apply] | record --skill <nombre> --source <url> --target <proyecto> [--apply]");
 }
 
 const profiles = selectedProfiles();
@@ -169,35 +187,19 @@ if (blocked.length && !allowReviewRequired) {
   process.exit(1);
 }
 
-console.log(apply ? "SKILLS: APPLY" : "SKILLS: DRY-RUN");
+console.log(apply ? "SKILLS: RECORD-APPLY" : "SKILLS: DRY-RUN");
 console.log(`Perfiles: ${profiles.join(", ")}`);
 console.log(`Proyecto: ${target}`);
+console.log("V6 no descarga automáticamente. Instala manualmente cada skill y este comando solo registra el lock:");
 for (const skill of skills) {
-  console.log(`- ${skill.name}: npx ${installCommand(skill).join(" ")}`);
+  console.log(`- ${skill.name}: ${manualCommand(skill)}`);
 }
 
 if (!apply) {
-  console.log("Vista previa solamente. Repite con --apply para descargar e instalar.");
+  console.log("Vista previa solamente. Tras instalar manualmente, repite con --apply para registrar.");
   process.exit(0);
 }
 
-const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-for (const skill of skills) {
-  const env = {
-    ...process.env,
-    DISABLE_TELEMETRY: process.env.DISABLE_TELEMETRY ?? "1"
-  };
-  const result = spawnSync(npx, installCommand(skill).slice(1), {
-    cwd: target,
-    env,
-    stdio: "inherit"
-  });
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    console.error(`Falló la instalación de ${skill.name} con código ${result.status}`);
-    process.exit(result.status ?? 1);
-  }
-}
 const lock = writeLock(target, profiles, skills);
-console.log(`Instaladas ${skills.length} skills.`);
+console.log(`Registradas ${skills.length} skills (sin descargas).`);
 console.log(`Lockfile: ${lock}`);

@@ -4,7 +4,7 @@
   "policy": {
     "externalInstallation": "explicit",
     "scope": "project",
-    "agent": "opencode",
+    "agent": "multi",
     "copy": true,
     "telemetryOptOutByDefault": true,
     "reviewBeforeInstall": true

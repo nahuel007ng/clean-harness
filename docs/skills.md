@@ -1,47 +1,35 @@
-# Skills externas
+# Skills externas (V6: suggest + record, cero descargas)
 
-El harness incluye solo las skills internas que definen su comportamiento: `minimal-change`, `git-commit` y las capacidades base de frontend, backend y mobile.
+El núcleo incluye solo las skills internas: `minimal-change`, `git-commit` y las capacidades base `frontend`, `backend`, `mobile` (routers sin framework).
 
-Las skills externas de skills.sh no se descargan automáticamente al instalar el harness. Se registran en [skills/registry.json](../skills/registry.json) y se agregan al proyecto mediante un perfil explícito.
+## Principio
 
-## Por qué no se instalan todas
+El port instala **cero skills externas** (ni siquiera `find-skills`). La tabla de candidatas vive en `templates/core/skills-recomendadas.md`. El flujo siempre es:
 
-Una skill puede incluir instrucciones, scripts y referencias que afectan el comportamiento del agente. skills.sh ofrece auditorías y un CLI útil, pero también advierte que no garantiza la calidad o seguridad de todo lo publicado. Por eso cada skill se revisa, se instala a nivel de proyecto y se conserva como copia versionada.
-
-OpenCode descubre skills desde `.opencode/skills`, `.agents/skills` y otras rutas compatibles del proyecto. El CLI de skills.sh puede apuntar a OpenCode con `--agent opencode`; el harness usa `--copy` para que el proyecto no dependa de una instalación global.
-
-## Perfiles iniciales
-
-- `web`: `frontend-design`, `vercel-react-best-practices`, `webapp-testing`.
-- `design-heavy`: `frontend-design` y, solo con autorización adicional, `ui-ux-pro-max`.
-- `backend`: `backend-development` como guía genérica opcional.
-- `postgres`: `supabase-postgres-best-practices`.
-- `testing`: `webapp-testing` y `playwright-best-practices`.
-- `react-native`: `vercel-react-native-skills`.
-- `expo`: React Native más `building-native-ui` y `native-data-fetching`.
-- `android`: `android-kotlin` y la skill oficial Android `testing-setup`.
-- `android-compose`: `mobile-android-design` y `edge-to-edge`.
-- `android-device`: `qa-testing-android`, solo cuando se detectan pruebas instrumentadas.
-- `android-device-advanced`: `appium`, siempre explícito.
-- `android-camera`: `camerax`, solo cuando se detecta CameraX.
-
-La selección real depende del stack detectado. No se instala una skill de Next.js, Expo, PostgreSQL, Playwright o Android si el proyecto no utiliza esa tecnología. La detección solo lee archivos; no ejecuta Gradle, ADB, scripts del proyecto ni código externo.
+```text
+node scripts/skills.mjs suggest --target <proyecto>   # solo lectura, sin red
+# el agente propone 1-2 candidatas con fuente exacta y evidencia
+# humano aprueba
+# instalación manual con telemetría desactivada
+# node scripts/skills.mjs record --skill <nombre> --source <url> --target <proyecto> --apply
+```
 
 ## Comandos
 
-Desde el repositorio del harness:
-
 ```text
 node scripts/skills.mjs list
-node scripts/skills.mjs show web
-node scripts/skills.mjs suggest --target C:\ruta\al\proyecto
-node scripts/skills.mjs install --profile web --target C:\ruta\al\proyecto
-node scripts/skills.mjs install --profile web --target C:\ruta\al\proyecto --apply
-node scripts/skills.mjs install --profile android --profile android-compose --target C:\ruta\al\proyecto --apply
+node scripts/skills.mjs show --profile web
+node scripts/skills.mjs suggest --target <proyecto>
+node scripts/skills.mjs suggest --target <proyecto> --json
+node scripts/skills.mjs install --profile web --target <proyecto>
+node scripts/skills.mjs install --profile web --target <proyecto> --apply
+node scripts/skills.mjs record --skill <nombre> --source <url> --target <proyecto> --apply
 ```
 
-`suggest` muestra evidencias y skills, pero no descarga nada. El primer comando de instalación es una vista previa. La ejecución real requiere `--apply`. Se pueden combinar perfiles y las skills repetidas se instalan una sola vez. El perfil `design-heavy` requiere además `--allow-review-required` porque `ui-ux-pro-max` aparece con un fallo en Gen Agent Trust Hub a fecha 2026-08-15.
+`install` en V6 **no descarga**: imprime los comandos manuales (`DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx skills add <fuente> --skill <nombre> --copy --yes`) y con `--apply` solo registra el lock tras tu instalación manual. `record` registra una skill individual con el mismo gate.
 
-Con `--apply`, el script agrega o actualiza `.harness/skills-lock.json` en el proyecto. El lockfile conserva la fuente, estado de revisión, perfil y fecha de cada skill instalada. `doctor --project` verifica que cada entrada tenga una copia local en `.agents/skills` o `.opencode/skills`.
+El perfil `design-heavy` requiere además `--allow-review-required` porque `ui-ux-pro-max` tiene un fallo de confianza a fecha 2026-08-15. `find-skills` es opcional bajo el mismo gate (auditoría Snyk en advertencia) y nunca se preinstala.
 
-Para desactivar la telemetría anónima del CLI, se usa `DISABLE_TELEMETRY=1` o `DO_NOT_TRACK=1`; el script del harness lo establece por defecto.
+## Lockfile y verificación
+
+Con `--apply` se escribe `.harness/skills-lock.json` (fuente, perfil, revisión, fecha). `doctor --project` verifica que cada entrada tenga copia local en `.agents/skills/` o en el espejo del adapter (`.opencode/skills`, `.codex/skills`, `.gemini/skills`). La detección solo lee archivos (máx 5000, sin ejecutar Gradle/ADB/scripts) y excluye directorios de harness y documentación.
