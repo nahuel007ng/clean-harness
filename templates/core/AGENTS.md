@@ -19,7 +19,7 @@ Estas reglas no dependen de ningún TUI. La sintaxis concreta vive en `adapters/
 - Corrige la causa raíz y reutiliza patrones existentes.
 - No añadas abstracciones, dependencias ni documentación especulativa.
 - Conserva validación en límites de confianza, seguridad, accesibilidad y manejo de errores.
-- Mantén los cambios acotados a la tarea. Cada acción (tests, builds, installs, revisión) puede usar un trabajador fresco sin cambiar la ruta elegida.
+- Mantén los cambios acotados a la tarea. Cada acción (tests, builds, installs, revisión) se ejecuta en secuencia sin cambiar la ruta elegida; solo delega en subagentes si el TUI y sus permisos lo permiten.
 
 ## Cierre
 
