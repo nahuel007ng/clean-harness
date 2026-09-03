@@ -133,3 +133,99 @@ test("detect-legacy no reporta un init V6 fresco como legacy", () => {
     fs.rmSync(target, { recursive: true, force: true });
   }
 });
+
+test("doctor --project inexistente falla con exit 2", () => {
+  const missing = path.join(os.tmpdir(), `harness-missing-${Date.now()}`);
+  let failed = false;
+  try {
+    run("doctor.mjs", ["--project", missing]);
+  } catch (error) {
+    failed = true;
+    assert.equal(error.status, 2);
+    assert.match(String(error.stderr ?? error.message), /no existe|no es un directorio/i);
+  }
+  assert.ok(failed);
+});
+
+test("skills show acepta perfil en mayúsculas", () => {
+  const out = run("skills.mjs", ["show", "--profile", "WEB"]);
+  assert.match(out, /frontend-design/);
+});
+
+test("install --agent acepta mayúsculas", () => {
+  const target = makeTemp();
+  try {
+    run("install.mjs", ["--agent", "OpenCode", "--target", target, "--apply"]);
+    assert.ok(fs.existsSync(path.join(target, ".opencode", "opencode.json")));
+    assert.ok(!fs.existsSync(path.join(target, "GEMINI.md")));
+  } finally {
+    fs.rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test("migrate rechaza archiveDir inseguro", () => {
+  const target = makeTemp();
+  const manifest = path.join(target, "bad.json");
+  try {
+    fs.writeFileSync(manifest, JSON.stringify({
+      archiveDir: "../evil",
+      protectedSegments: [],
+      paths: [{ path: ".opencode", kind: "harness", reason: "x" }]
+    }), "utf8");
+    let failed = false;
+    try {
+      run("migrate.mjs", ["--target", target, "--manifest", manifest]);
+    } catch (error) {
+      failed = true;
+      assert.equal(error.status, 1);
+    }
+    assert.ok(failed);
+  } finally {
+    fs.rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test("migrate falla con paths vacío", () => {
+  const target = makeTemp();
+  const manifest = path.join(target, "empty.json");
+  try {
+    fs.writeFileSync(manifest, JSON.stringify({ archiveDir: ".harness-archive", protectedSegments: [], paths: [] }), "utf8");
+    let failed = false;
+    try {
+      run("migrate.mjs", ["--target", target, "--manifest", manifest]);
+    } catch (error) {
+      failed = true;
+      assert.equal(error.status, 1);
+    }
+    assert.ok(failed);
+  } finally {
+    fs.rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test("migrate dry-run no mueve y apply archiva, omitiendo inexistentes", () => {
+  const target = makeTemp();
+  const manifest = path.join(target, "manifest.json");
+  try {
+    fs.mkdirSync(path.join(target, ".opencode"), { recursive: true });
+    fs.writeFileSync(path.join(target, ".opencode", "opencode.json"), "{}\n", "utf8");
+    fs.writeFileSync(manifest, JSON.stringify({
+      archiveDir: ".harness-archive",
+      protectedSegments: ["docs", "wiki", "vault", "knowledge", ".kb"],
+      paths: [
+        { path: ".opencode", kind: "harness", reason: "legacy" },
+        { path: ".codex", kind: "harness", reason: "legacy" }
+      ]
+    }), "utf8");
+    const dry = run("migrate.mjs", ["--target", target, "--manifest", manifest]);
+    assert.match(dry, /DRY-RUN/);
+    assert.match(dry, /omitida \(no existe\): .codex/);
+    assert.ok(fs.existsSync(path.join(target, ".opencode", "opencode.json")));
+    run("migrate.mjs", ["--target", target, "--manifest", manifest, "--apply"]);
+    assert.ok(!fs.existsSync(path.join(target, ".opencode", "opencode.json")));
+    const archiveRoot = path.join(target, ".harness-archive");
+    assert.ok(fs.existsSync(archiveRoot));
+  } finally {
+    fs.rmSync(target, { recursive: true, force: true });
+  }
+});
